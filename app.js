@@ -2,7 +2,8 @@ let repositories = [
     { name: 'intel/torch-xpu-ops', checked: true, valid: true },
     { name: 'pytorch/pytorch', checked: true, valid: true },
     { name: 'pytorch/kineto', checked: true, valid: true },
-    { name: 'uxlfoundation/oneDNN', checked: false, valid: true }
+    { name: 'uxlfoundation/oneDNN', checked: false, valid: true },
+    { name: 'vllm-project/vllm-gaudi', checked: false, valid: true }
 ];
 
 // --- Authentication ---
