@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 Silv3S
+Copyright (c) 2026 Silv3S
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,31 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-⚠️  SECURITY DISCLAIMER — PLEASE READ BEFORE USE ⚠️
-
-THIS SOFTWARE HANDLES GITHUB PERSONAL ACCESS TOKENS (PATs) ENTERED DIRECTLY
-BY THE USER IN THE BROWSER.
-
-- Your token is stored in your browser's `localStorage` and is transmitted
-  directly to `api.github.com` and `models.github.com` as a Bearer token on
-  every API request made while the app is running.
-
-- THIS APPLICATION WAS VIBE-CODED AND HAS NOT UNDERGONE A FORMAL SECURITY
-  AUDIT.  No guarantees are made about the security, correctness, or
-  reliability of the code.
-
-- You use this application ENTIRELY AT YOUR OWN RISK.  The authors accept NO
-  responsibility for any loss, data breach, account compromise, or other harm
-  that may result from using this software or from entering your GitHub token
-  into it.
-
-- NEVER enter tokens with write or admin scopes unless you fully understand
-  the implications and trust the code you are running.
-
-- Always review the source code yourself before entering any credentials.
-
-By using this software you acknowledge that you have read this disclaimer and
-accept all associated risks.
