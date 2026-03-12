@@ -83,31 +83,25 @@ async function updateAuthStatus(user) {
             });
             if (!resp.ok) {
                 localStorage.removeItem('githubPAT');
-                updateAuthStatus(null);
-                return;
+                return await updateAuthStatus(null);
             }
             user = await resp.json();
         } catch (e) {
             localStorage.removeItem('githubPAT');
-            updateAuthStatus(null);
-            return;
+            return await updateAuthStatus(null);
         }
     }
 
-    // Count actual accessible private repos
-    let accessInfo = '';
-    try {
-        const reposResp = await fetch('https://api.github.com/user/repos?visibility=private&per_page=100', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (reposResp.ok) {
-            const repos = await reposResp.json();
-        }
-    } catch (e) { /* ignore */ }
-
     statusEl.className = 'auth-status authenticated';
     statusEl.querySelector('.auth-status-icon').innerHTML = '🟢';
-    statusText.innerHTML = `Signed in as <a href="https://www.github.com/${user.login}"><strong>${user.login}</strong></a>${accessInfo}`;
+    // Build status text safely without using innerHTML
+    statusText.textContent = 'Signed in as ';
+    const profileLink = document.createElement('a');
+    profileLink.href = 'https://www.github.com/' + encodeURIComponent(user.login);
+    const strongEl = document.createElement('strong');
+    strongEl.textContent = user.login;
+    profileLink.appendChild(strongEl);
+    statusText.appendChild(profileLink);
     inputWrapper.style.display = 'none';
     disconnectBtn.style.display = 'inline-block';
 }
@@ -165,6 +159,7 @@ function saveRepositoriesToCache() {
 async function validateRepository(repoName) {
     try {
         const response = await fetch(`https://api.github.com/repos/${repoName}`, {
+            method: 'HEAD',
             headers: getAuthHeaders()
         });
         return response.ok;
