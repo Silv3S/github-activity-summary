@@ -584,7 +584,7 @@ Your summary should concisely explain:
 2. Why was it needed? What problem or opportunity does it address?
 
 Guidelines:
-- Keep it short and focused (aim for 1-3 sentences, max 1 short paragraph)
+- Keep it short and focused (aim for 1-2 sentences, max 1 short paragraph)
 - Write in flowing professional prose, not bullet points
 - Do NOT repeat the PR title, URL, or link in your description
 - Do NOT start with generic phrases like "This PR includes changes to..." or "This pull request enhances "
@@ -617,13 +617,13 @@ ${diffSnippet}`;
 
     // Render summaries
     const modelLabel = usedModel ? usedModel.split('/').pop() : '';
-    let html = '<div class="summary-section-header"><span>PR Summaries' + (modelLabel ? ` <small style="opacity:0.5;font-weight:400;">via ${modelLabel}</small>` : '') + '</span><button class="summary-close-btn" onclick="closeSummary()" title="Close">\u00d7</button></div>';
+    let html = '<div class="summary-section-header"><span>PR Summaries' + (modelLabel ? ` <small style="opacity:0.5;font-weight:400;">via ${modelLabel}</small>` : '') + '</span><button class="summary-close-btn" onclick="closeSummary()" title="Close" aria-label="Close summaries">\u00d7</button></div>';
     for (const s of summaries) {
         const safeLink = s.pr.html_url.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         const safeTitle = (s.pr.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const safeDesc = (s.description || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         html += `<div class="summary-item">
-            <div class="summary-item-link"><span class="summary-label">PR link:</span> <a href="${safeLink}" target="_blank">${safeLink}</a></div>
+            <div class="summary-item-link"><span class="summary-label rel="noopener noreferrer">${safeLink}</a></div>
             <div class="summary-item-title"><span class="summary-label">Title:</span> ${safeTitle}</div>
             <div class="summary-item-description"><span class="summary-label">Description:</span> ${safeDesc}</div>
         </div>`;
@@ -631,7 +631,13 @@ ${diffSnippet}`;
     summaryEl.innerHTML = html;
 
     summarizeBtn.textContent = originalText;
-    summarizeBtn.disabled = false;
+    if (typeof updateDownloadButton === 'function') {
+        // Restore button state based on current PAT/selection rules
+        updateDownloadButton();
+    } else {
+        // Fallback to previous behavior if no centralized updater exists
+        summarizeBtn.disabled = false;
+    }
 }
 
 function setLast31Days() {
