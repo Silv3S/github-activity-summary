@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/b4891091-830f-45d5-991d-c3f80f2563f0
 - **Date range filtering** – narrow results to a custom date window or jump straight to the last 31 days
 - **Status overview** – instant counts of open, merged, and closed PRs
 - **Diff downloads** – select any PRs and download all their diffs in a single ZIP archive
-- **AI-powered summaries** – generate a professional plain-English summary of selected PRs using GitHub Models (GPT-4o)
+- **AI-powered summaries** – generate a professional summary of selected PRs using GitHub Models (e.g. GPT-4o)
 - **Dark / light theme** – toggle between themes; preference is remembered across sessions
 - **No server required** – runs entirely in the browser with no build step or installation
 
@@ -33,7 +33,7 @@ A Personal Access Token unlocks:
 - **Higher API rate limits** (5,000 req/hr instead of 60)
 - The **AI summary** feature
 
-Click the **key icon (🔑)** in the top-right corner, paste your token, and press **Connect**.  
+Paste your token into the **GitHub Token (optional)** input field at the top of the page and press **Connect** (or **Disconnect** to remove it).  
 To create a token, visit **Settings → Developer settings → Personal access tokens (classic)** and enable the `repo` and `read:user` scopes.  
 Your token is stored only in your browser's `localStorage` and is never sent anywhere other than `api.github.com`.
 
@@ -45,16 +45,16 @@ Type the GitHub username whose pull request activity you want to review into the
 
 The sidebar lists a default set of repositories.  Check or uncheck any of them to include or exclude them from the search.
 
-To track an additional repository, type its full name (e.g. `owner/repo`) into the **Add repository** box and press **Enter** or click **Add**.  The app will validate the repository against the GitHub API and add it to the list if accessible.
+To track an additional repository, type its full name (e.g. `owner/repo`) into the **Add repository** box and press **Enter** or click **Add**.  The app will validate the repository against the GitHub API and add it to the list.  Unrecognised repositories are also added but marked as invalid and excluded from further processing.
 
 ### 4. Set a date range
 
 - Use the **date picker** to choose a custom *From – To* window, or
 - Click **Last 31 Days** to jump straight to the most recent month.
 
-### 5. Search
+### 5. Load activity
 
-Click **Search** (or press Enter in the username field).  
+Click the **Load Activity** button.  
 The app queries the GitHub Search API for pull requests that match each selected repository, the given username, and the chosen date range.  Results appear as a table showing the PR title, repository, status, and creation date.
 
 ### 6. Download diffs
@@ -65,23 +65,9 @@ All selected PR diffs are fetched and bundled into a ZIP file named `pr_diffs.zi
 ### 7. Generate an AI summary
 
 Check the PRs you want summarised and click **Summarize**.  
-The app sends each diff to the GitHub Models API (trying `gpt-4o` → `gpt-4-turbo` → `gpt-4o-mini` in order) and displays a concise, professional summary of the work done.  Without a GitHub token the app falls back to the free tier model, which may produce lower-quality summaries; providing a token is strongly recommended for best results.
+The app sends each diff to the GitHub Models API (trying `gpt-4o` → `gpt-4-turbo` → `gpt-4o-mini` in order) and displays a concise, professional summary of the work done.  Without a GitHub token the app falls back to the free tier model, which may produce lower-quality summaries. Providing a token is strongly recommended for best results.
 
 ### 8. Switch themes
 
-Click the **theme toggle** (☀️ / 🌙) in the top-right corner to switch between light and dark modes. Your preference is saved automatically.
-
-## Configuration
-
-All settings are persisted to the browser's `localStorage` — no config files needed.
-
-| Setting | Key | Description |
-|---------|-----|-------------|
-| GitHub token | `githubPAT` | Classic Personal Access Token |
-| Theme | `githubActivityTheme` | `"dark"` or `"light"` |
-| Repository list | `githubActivityRepos` | JSON array of `{ name, checked, valid }` objects |
-
-## License
-
-This project is provided as-is. See the repository for any applicable license information.
+Click the **theme toggle** (☀️ / 🌙) in the top-right corner to switch between light and dark modes.
 
