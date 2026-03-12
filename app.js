@@ -514,7 +514,7 @@ function closeSummary() {
 }
 
 async function callModelsAPI(token, messages) {
-    const models = ['anthropic/claude-opus-4', 'openai/gpt-4o-mini'];
+    const models = ['gpt-4o', 'gpt-4-turbo', 'gpt-4o-mini'];
     for (const model of models) {
         const resp = await fetch('https://models.github.ai/inference/chat/completions', {
             method: 'POST',
@@ -528,6 +528,8 @@ async function callModelsAPI(token, messages) {
             const data = await resp.json();
             return { ok: true, model, content: data.choices?.[0]?.message?.content?.trim() || '' };
         }
+        // Debug: log why model failed
+        console.log(`Model ${model} returned ${resp.status}`);
         // If 401/403/404, try next model; otherwise report error
         if (resp.status !== 401 && resp.status !== 403 && resp.status !== 404) {
             return { ok: false, model, error: resp.status };
