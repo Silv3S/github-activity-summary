@@ -625,7 +625,7 @@ ${diffSnippet}`;
         const safeTitle = (s.pr.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const safeDesc = (s.description || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         html += `<div class="summary-item">
-            <div class="summary-item-link"><span class="summary-label rel="noopener noreferrer">${safeLink}</a></div>
+            <div class="summary-item-link"><span class="summary-label">PR link:</span> <a href="${safeLink}" target="_blank" rel="noopener noreferrer">${safeLink}</a></div>
             <div class="summary-item-title"><span class="summary-label">Title:</span> ${safeTitle}</div>
             <div class="summary-item-description"><span class="summary-label">Description:</span> ${safeDesc}</div>
         </div>`;
