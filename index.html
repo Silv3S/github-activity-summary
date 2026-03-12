@@ -41,18 +41,33 @@
             <h1>GitHub Activity Summary</h1>
         </div>
 
-        <div class="date-section">
-            <h2><span class="step-indicator">Step 1</span> Pick date range</h2>
-            <div class="date-inputs">
-                <div class="date-input-group">
-                    <label for="startDate">Start Date:</label>
-                    <input type="text" id="startDate" placeholder="Select date" readonly>
-                </div>
-                <div class="date-input-group">
-                    <label for="endDate">End Date:</label>
-                    <input type="text" id="endDate" placeholder="Select date" readonly>
-                </div>
-                <button onclick="setLast31Days()" class="preset-btn">Last 31 Days</button>
+        <div class="auth-section">
+            <div class="auth-header">
+                <h2>
+                    <span class="step-indicator">Auth</span> GitHub Token (optional)
+                    <span class="token-help" title="Use a Fine-grained Personal Access Token.&#10;&#10;Create one at: github.com/settings/personal-access-tokens/new&#10;&#10;Required permissions (Repository permissions):&#10;  &#8226; Contents: Read-only&#10;  &#8226; Metadata: Read-only (default)&#10;  &#8226; Pull requests: Read-only">?</span>
+                </h2>
+                <button id="disconnectBtn" class="disconnect-btn" style="display: none;" onclick="disconnectToken()">×</button>
+            </div>
+            <div id="authStatus" class="auth-status unauthenticated">
+                <span class="auth-status-icon">&#128275;</span>
+                <span id="authStatusText">Public access only — private repos not available</span>
+            </div>
+            <div id="authInputWrapper" class="auth-input-wrapper">
+                <input type="password" id="tokenInput" placeholder="github_pat_..." aria-label="GitHub personal access token" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+                <button onclick="connectWithToken()">Connect</button>
+            </div>
+            <div id="authErrorMessage" class="error-message"></div>
+        </div>
+
+        <div class="username-section">
+            <h2><span class="step-indicator">Step 1</span> Provide GitHub username</h2>
+            <div class="username-input-wrapper">
+                <input 
+                    type="text" 
+                    id="usernameInput" 
+                    placeholder="Enter GitHub username"
+                >
             </div>
         </div>
         
@@ -72,14 +87,18 @@
             </div>
         </div>
         
-        <div class="username-section">
-            <h2><span class="step-indicator">Step 3</span> Provide GitHub username</h2>
-            <div class="username-input-wrapper">
-                <input 
-                    type="text" 
-                    id="usernameInput" 
-                    placeholder="Enter GitHub username"
-                >
+        <div class="date-section">
+            <h2><span class="step-indicator">Step 3</span> Pick date range</h2>
+            <div class="date-inputs">
+                <div class="date-input-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="text" id="startDate" placeholder="Select date" readonly>
+                </div>
+                <div class="date-input-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="text" id="endDate" placeholder="Select date" readonly>
+                </div>
+                <button onclick="setLast31Days()" class="preset-btn">Last 31 Days</button>
             </div>
         </div>
         

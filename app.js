@@ -5,6 +5,107 @@ let repositories = [
     { name: 'uxlfoundation/oneDNN', checked: false, valid: true }
 ];
 
+// --- Authentication ---
+
+function getAuthHeaders() {
+    const token = localStorage.getItem('githubPAT');
+    if (token) {
+        return { 'Authorization': `Bearer ${token}` };
+    }
+    return {};
+}
+
+async function connectWithToken() {
+    const input = document.getElementById('tokenInput');
+    const errorEl = document.getElementById('authErrorMessage');
+    const token = input.value.trim();
+    errorEl.textContent = '';
+
+    if (!token) {
+        errorEl.textContent = '⚠️ Please paste a Fine-grained Personal Access Token';
+        return;
+    }
+
+    try {
+        const resp = await fetch('https://api.github.com/user', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!resp.ok) {
+            errorEl.textContent = '❌ Invalid token — GitHub returned ' + resp.status;
+            return;
+        }
+
+        const user = await resp.json();
+        localStorage.setItem('githubPAT', token);
+        input.value = '';
+        await updateAuthStatus(user);
+        // Re-validate repos with new auth
+        repositories.forEach(r => { r.valid = undefined; });
+        validateAllRepositories();
+    } catch (e) {
+        errorEl.textContent = '❌ Network error while validating token';
+    }
+}
+
+function disconnectToken() {
+    localStorage.removeItem('githubPAT');
+    updateAuthStatus(null);
+    // Re-validate repos (some may become inaccessible)
+    repositories.forEach(r => { r.valid = undefined; });
+    validateAllRepositories();
+}
+
+async function updateAuthStatus(user) {
+    const statusEl = document.getElementById('authStatus');
+    const statusText = document.getElementById('authStatusText');
+    const inputWrapper = document.getElementById('authInputWrapper');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const errorEl = document.getElementById('authErrorMessage');
+    errorEl.textContent = '';
+
+    const token = localStorage.getItem('githubPAT');
+
+    if (!token) {
+        statusEl.className = 'auth-status unauthenticated';
+        statusEl.querySelector('.auth-status-icon').innerHTML = '🔒';
+        statusText.textContent = 'Access to private repositories requires PAT';
+        inputWrapper.style.display = 'flex';
+        disconnectBtn.style.display = 'none';
+        return;
+    }
+
+    // If no user object passed, fetch it
+    if (!user) {
+        try {
+            const resp = await fetch('https://api.github.com/user', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!resp.ok) {
+                localStorage.removeItem('githubPAT');
+                return await updateAuthStatus(null);
+            }
+            user = await resp.json();
+        } catch (e) {
+            localStorage.removeItem('githubPAT');
+            return await updateAuthStatus(null);
+        }
+    }
+
+    statusEl.className = 'auth-status authenticated';
+    statusEl.querySelector('.auth-status-icon').innerHTML = '🟢';
+    // Build status text safely without using innerHTML
+    statusText.textContent = 'Signed in as ';
+    const profileLink = document.createElement('a');
+    profileLink.href = 'https://www.github.com/' + encodeURIComponent(user.login);
+    const strongEl = document.createElement('strong');
+    strongEl.textContent = user.login;
+    profileLink.appendChild(strongEl);
+    statusText.appendChild(profileLink);
+    inputWrapper.style.display = 'none';
+    disconnectBtn.style.display = 'inline-block';
+}
+
 function getPreferredTheme() {
     const savedTheme = localStorage.getItem('githubActivityTheme');
     if (savedTheme) {
@@ -57,7 +158,10 @@ function saveRepositoriesToCache() {
 
 async function validateRepository(repoName) {
     try {
-        const response = await fetch(`https://api.github.com/repos/${repoName}`, { method: 'HEAD' });
+        const response = await fetch(`https://api.github.com/repos/${repoName}`, {
+            method: 'HEAD',
+            headers: getAuthHeaders()
+        });
         return response.ok;
     } catch (e) {
         return false;
@@ -173,7 +277,9 @@ async function loadUserAndPRs() {
     }
     
     try {
-        const userResponse = await fetch(`https://api.github.com/users/${username}`);
+        const userResponse = await fetch(`https://api.github.com/users/${username}`, {
+            headers: getAuthHeaders()
+        });
         
         if (!userResponse.ok) {
             errorElement.textContent = '❌ User not found';
@@ -203,7 +309,9 @@ async function loadUserAndPRs() {
         for (const repo of selectedRepos) {
             try {
                 let searchQuery = `repo:${repo} author:${username} type:pr created:${startDate}..${endDate}`;
-                const prResponse = await fetch(`https://api.github.com/search/issues?q=${encodeURIComponent(searchQuery)}&per_page=100`);
+                const prResponse = await fetch(`https://api.github.com/search/issues?q=${encodeURIComponent(searchQuery)}&per_page=100`, {
+                    headers: getAuthHeaders()
+                });
                 
                 if (!prResponse.ok) {
                     console.warn(`Failed to load PRs from ${repo}`);
@@ -216,7 +324,9 @@ async function loadUserAndPRs() {
                 for (const issue of searchResults.items) {
                     try {
                         const prDetailUrl = issue.pull_request.url;
-                        const prDetailResponse = await fetch(prDetailUrl);
+                        const prDetailResponse = await fetch(prDetailUrl, {
+                            headers: getAuthHeaders()
+                        });
                         
                         if (prDetailResponse.ok) {
                             const prDetail = await prDetailResponse.json();
@@ -353,7 +463,8 @@ async function downloadSelectedDiffs() {
                 // Fetch the diff using GitHub API
                 const response = await fetch(pr.pull_request.url, {
                     headers: {
-                        'Accept': 'application/vnd.github.v3.diff'
+                        'Accept': 'application/vnd.github.v3.diff',
+                        ...getAuthHeaders()
                     }
                 });
                 
@@ -459,6 +570,7 @@ function initializeDates() {
 
 document.addEventListener('DOMContentLoaded', () => {
     setTheme(getPreferredTheme());
+    updateAuthStatus(null);
     
     initializeDates();
     loadRepositoriesFromCache();
@@ -474,6 +586,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('customRepo').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             addCustomRepo();
+        }
+    });
+    
+    document.getElementById('tokenInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            connectWithToken();
         }
     });
 });
