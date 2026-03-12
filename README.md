@@ -1,5 +1,12 @@
 # GitHub Activity Summary
 
+> ⚠️ **SECURITY DISCLAIMER** ⚠️
+>
+> This application accepts a **GitHub Personal Access Token (PAT)** which is stored in your browser's `localStorage` and sent directly to `api.github.com` and `models.github.com` on every API request.
+>
+> **This app was vibe-coded and has NOT undergone a formal security audit.**
+> Use it entirely at your own risk. Never enter tokens with write or admin scopes unless you have reviewed the source code and fully understand the implications. The authors accept no responsibility for any loss, data breach, or account compromise that may result from using this software.
+
 A lightweight, browser-based tool for tracking and summarising GitHub pull request activity across multiple repositories.
 
 https://github.com/user-attachments/assets/b4891091-830f-45d5-991d-c3f80f2563f0
@@ -70,4 +77,10 @@ The app sends each diff to the GitHub Models API (trying `gpt-4o` → `gpt-4-tur
 ### 8. Switch themes
 
 Click the **theme toggle** (☀️ / 🌙) in the top-right corner to switch between light and dark modes.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+You are free to copy, fork, extend, and redistribute this software. However, please read the **Security Disclaimer** at the top of this file and in the `LICENSE` file carefully before using or deploying the application. This software is provided **as-is, with no warranty of any kind**.
 
