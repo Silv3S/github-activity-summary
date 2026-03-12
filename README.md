@@ -30,7 +30,7 @@ The app is hosted on GitHub Pages — no installation needed.
 
 A Personal Access Token unlocks:
 - Access to **private repositories**
-- **Higher API rate limits** (5,000 req/hr instead of 60)
+- **Higher API rate limits**
 - The **AI summary** feature
 
 Paste your token into the **GitHub Token (optional)** input field at the top of the page and press **Connect** (or **Disconnect** to remove it).  
