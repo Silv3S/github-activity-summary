@@ -17,44 +17,13 @@ https://github.com/user-attachments/assets/b4891091-830f-45d5-991d-c3f80f2563f0
 ## Requirements
 
 - A modern web browser (Chrome, Firefox, Edge, Safari)
-- Internet access to reach the [GitHub REST API](https://docs.github.com/en/rest)
 - A [GitHub Personal Access Token (classic)](https://github.com/settings/tokens/new) *(optional, but required for private repositories and AI summaries)*
 
 ## Getting Started
 
-Because the application is a static HTML/CSS/JS site there is nothing to install or compile.
+The app is hosted on GitHub Pages — no installation needed.
 
-1. **Download or clone the repository**
-
-   ```bash
-   git clone https://github.com/Silv3S/github-activity-summary.git
-   cd github-activity-summary
-   ```
-
-2. **Open `index.html` in your browser**
-
-   You can open the file directly:
-
-   ```
-   # Windows
-   start index.html
-
-   # macOS
-   open index.html
-
-   # Linux
-   xdg-open index.html
-   ```
-
-   Or serve it with any static file server:
-
-   ```bash
-   # Python 3
-   python -m http.server 8000
-   # then visit http://localhost:8000
-   ```
-
-That's it — no `npm install`, no build step, no backend.
+👉 **[Open the app](https://silv3s.github.io/github-activity-summary/)**
 
 ## Tutorial
 
