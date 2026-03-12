@@ -33,7 +33,7 @@ A Personal Access Token unlocks:
 - **Higher API rate limits**
 - The **AI summary** feature
 
-Paste your token into the **GitHub Token (optional)** input field at the top of the page and press **Connect** (or **Disconnect** to remove it).  
+Paste your token into the **GitHub Token (optional)** input field at the top of the page and press **Connect**.  
 To create a token, visit **Settings → Developer settings → Personal access tokens (classic)** and enable the `repo` and `read:user` scopes.  
 Your token is stored only in your browser's `localStorage` and is never sent anywhere other than `api.github.com`.
 
