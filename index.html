@@ -45,7 +45,7 @@
             <div class="auth-header">
                 <h2>
                     <span class="step-indicator">Auth</span> GitHub Token (optional)
-                    <span class="token-help" title="Use a Fine-grained Personal Access Token.&#10;&#10;Create one at: github.com/settings/personal-access-tokens/new&#10;&#10;Required permissions (Repository permissions):&#10;  &#8226; Contents: Read-only&#10;  &#8226; Metadata: Read-only (default)&#10;  &#8226; Pull requests: Read-only">?</span>
+                    <span class="token-help" title="Use a Classic Personal Access Token.&#10;&#10;Create one at: github.com/settings/tokens/new&#10;&#10;Required scopes:&#10;  &#8226; repo (for private repository access)&#10;&#10;A Classic PAT enables the Summarize feature.">?</span>
                 </h2>
                 <button id="disconnectBtn" class="disconnect-btn" style="display: none;" onclick="disconnectToken()">×</button>
             </div>
@@ -54,7 +54,7 @@
                 <span id="authStatusText">Public access only — private repos not available</span>
             </div>
             <div id="authInputWrapper" class="auth-input-wrapper">
-                <input type="password" id="tokenInput" placeholder="github_pat_..." aria-label="GitHub personal access token" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+                <input type="password" id="tokenInput" placeholder="ghp_... (classic PAT)" aria-label="GitHub personal access token" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
                 <button onclick="connectWithToken()">Connect</button>
             </div>
             <div id="authErrorMessage" class="error-message"></div>
@@ -132,9 +132,14 @@
             <div class="pr-section">
                 <div class="pr-header">
                     <h2>Pull Requests</h2>
-                    <button id="downloadBtn" onclick="downloadSelectedDiffs()" class="download-btn" style="display: none;">Download Selected (0)</button>
+                    <div class="pr-header-buttons">
+                        <span id="selectedCount" class="selected-count-label"></span>
+                        <button id="summarizeBtn" onclick="summarizeSelectedPRs()" class="summarize-btn" disabled title="Requires a Classic PAT (ghp_...)">Summarize</button>
+                        <button id="downloadBtn" onclick="downloadSelectedDiffs()" class="download-btn" disabled>Download</button>
+                    </div>
                 </div>
                 <div id="prList" class="pr-list"></div>
+                <div id="summaryResults" class="summary-section" style="display: none;"></div>
             </div>
         </div>
     </div>

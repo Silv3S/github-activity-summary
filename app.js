@@ -23,7 +23,7 @@ async function connectWithToken() {
     errorEl.textContent = '';
 
     if (!token) {
-        errorEl.textContent = '⚠️ Please paste a Fine-grained Personal Access Token';
+        errorEl.textContent = '⚠️ Please paste a Classic Personal Access Token (ghp_...)';
         return;
     }
 
@@ -425,6 +425,9 @@ async function loadUserAndPRs() {
 function updateDownloadButton() {
     const checkboxes = document.querySelectorAll('.pr-checkbox:checked');
     const downloadBtn = document.getElementById('downloadBtn');
+    const summarizeBtn = document.getElementById('summarizeBtn');
+    const selectedCount = document.getElementById('selectedCount');
+    const hasPAT = !!localStorage.getItem('githubPAT');
     
     // Update selected visual state for all PR items
     document.querySelectorAll('.pr-item').forEach(item => {
@@ -437,10 +440,15 @@ function updateDownloadButton() {
     });
     
     if (checkboxes.length > 0) {
-        downloadBtn.style.display = 'block';
-        downloadBtn.textContent = `Download Selected (${checkboxes.length})`;
+        selectedCount.textContent = `(${checkboxes.length} selected)`;
+        downloadBtn.disabled = false;
+        summarizeBtn.disabled = !hasPAT;
+        summarizeBtn.title = hasPAT ? '' : 'Requires a Classic PAT (ghp_...)';
     } else {
-        downloadBtn.style.display = 'none';
+        selectedCount.textContent = '';
+        downloadBtn.disabled = true;
+        summarizeBtn.disabled = true;
+        summarizeBtn.title = 'Requires a Classic PAT (ghp_...)';
     }
 }
 
@@ -497,6 +505,133 @@ async function downloadSelectedDiffs() {
         downloadBtn.textContent = originalText;
         downloadBtn.disabled = false;
     }
+}
+
+function closeSummary() {
+    const summaryEl = document.getElementById('summaryResults');
+    summaryEl.style.display = 'none';
+    summaryEl.innerHTML = '';
+}
+
+async function callModelsAPI(token, messages) {
+    const models = ['anthropic/claude-opus-4', 'openai/gpt-4o-mini'];
+    for (const model of models) {
+        const resp = await fetch('https://models.github.ai/inference/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ model, messages, max_tokens: 300 })
+        });
+        if (resp.ok) {
+            const data = await resp.json();
+            return { ok: true, model, content: data.choices?.[0]?.message?.content?.trim() || '' };
+        }
+        // If 401/403/404, try next model; otherwise report error
+        if (resp.status !== 401 && resp.status !== 403 && resp.status !== 404) {
+            return { ok: false, model, error: resp.status };
+        }
+    }
+    return { ok: false, model: null, error: 'No accessible model' };
+}
+
+async function summarizeSelectedPRs() {
+    const checkboxes = document.querySelectorAll('.pr-checkbox:checked');
+    if (checkboxes.length === 0) return;
+
+    const token = localStorage.getItem('githubPAT');
+    if (!token) return;
+
+    const summarizeBtn = document.getElementById('summarizeBtn');
+    const summaryEl = document.getElementById('summaryResults');
+    const originalText = summarizeBtn.textContent;
+    summarizeBtn.textContent = 'Summarizing...';
+    summarizeBtn.disabled = true;
+
+    summaryEl.style.display = 'block';
+    summaryEl.innerHTML = '<div class="summary-loading">Generating summaries…</div>';
+
+    const selectedPRs = [];
+    for (const checkbox of checkboxes) {
+        const index = parseInt(checkbox.id.split('-')[1]);
+        selectedPRs.push(window.allPRs[index]);
+    }
+
+    const summaries = [];
+    let usedModel = null;
+    for (const pr of selectedPRs) {
+        let diffSnippet = '';
+        try {
+            const diffResp = await fetch(pr.pull_request.url, {
+                headers: {
+                    'Accept': 'application/vnd.github.v3.diff',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (diffResp.ok) {
+                const fullDiff = await diffResp.text();
+                diffSnippet = fullDiff.substring(0, 12000);
+            }
+        } catch (e) {
+            // proceed without diff
+        }
+
+        const prompt = `Provide a brief, professional summary of this GitHub Pull Request for formal reporting.
+
+Your summary should concisely explain:
+1. What does this PR accomplish? (new feature, bug fix, refactor, performance improvement, etc.)
+2. Why was it needed? What problem or opportunity does it address?
+
+Guidelines:
+- Keep it short and focused (aim for 1-3 sentences, max 1 short paragraph)
+- Write in flowing professional prose, not bullet points
+- Do NOT repeat the PR title, URL, or link in your description
+- Do NOT start with generic phrases like "This PR includes changes to..." or "This pull request enhances "
+- Focus on substance: what changed and why it matters
+- Use plain text only, no markdown formatting
+
+PR Details:
+Title: ${pr.title}
+Body: ${(pr.body || '').substring(0, 3000)}
+
+Diff (truncated):
+${diffSnippet}`;
+
+        try {
+            const messages = [
+                { role: 'system', content: 'You are an expert technical analyst specializing in code review and architectural assessment. Your task is to provide clear, insightful summaries of pull requests for formal review by technical and non-technical stakeholders, including government agencies. Focus on context, reasoning, and impact — not just listing changes.' },
+                { role: 'user', content: prompt }
+            ];
+            const result = await callModelsAPI(token, messages);
+            if (result.ok) {
+                usedModel = result.model;
+                summaries.push({ pr, description: result.content || 'Summary unavailable' });
+            } else {
+                summaries.push({ pr, description: `Summary unavailable (${result.error})` });
+            }
+        } catch (e) {
+            summaries.push({ pr, description: 'Summary unavailable (network error)' });
+        }
+    }
+
+    // Render summaries
+    const modelLabel = usedModel ? usedModel.split('/').pop() : '';
+    let html = '<div class="summary-section-header"><span>PR Summaries' + (modelLabel ? ` <small style="opacity:0.5;font-weight:400;">via ${modelLabel}</small>` : '') + '</span><button class="summary-close-btn" onclick="closeSummary()" title="Close">\u00d7</button></div>';
+    for (const s of summaries) {
+        const safeLink = s.pr.html_url.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const safeTitle = (s.pr.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const safeDesc = (s.description || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        html += `<div class="summary-item">
+            <div class="summary-item-link"><span class="summary-label">PR link:</span> <a href="${safeLink}" target="_blank">${safeLink}</a></div>
+            <div class="summary-item-title"><span class="summary-label">Title:</span> ${safeTitle}</div>
+            <div class="summary-item-description"><span class="summary-label">Description:</span> ${safeDesc}</div>
+        </div>`;
+    }
+    summaryEl.innerHTML = html;
+
+    summarizeBtn.textContent = originalText;
+    summarizeBtn.disabled = false;
 }
 
 function setLast31Days() {
