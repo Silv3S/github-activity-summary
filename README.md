@@ -66,7 +66,7 @@ All selected PR diffs are fetched and bundled into a ZIP file named `pr_diffs.zi
 ### 7. Generate an AI summary
 
 Check the PRs you want summarised and click **Summarize**.  
-The app sends each diff to the GitHub Models API (trying `gpt-4o` → `gpt-4-turbo` → `gpt-4o-mini` in order) and displays a concise, professional summary of the work done.  A valid GitHub token is required for this feature.
+The app sends each diff to the GitHub Models API (trying `gpt-4o` → `gpt-4-turbo` → `gpt-4o-mini` in order) and displays a concise, professional summary of the work done.  Without a GitHub token the app falls back to the free tier model, which may produce lower-quality summaries; providing a token is strongly recommended for best results.
 
 ### 8. Switch themes
 
